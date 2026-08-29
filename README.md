@@ -19,7 +19,7 @@ Built for the **micro1 Frontier Engineering Challenge** (Aug 28–31, 2026).
 | Repository-grounded claims, citations to file paths + line ranges | [`repowiki/citations.py`](repowiki/citations.py) + [`repowiki/index.py`](repowiki/index.py) — **cite-by-symbol**: the LLM cites `[[sym:qual.name]]`, a deterministic AST index attaches the exact line range |
 | Internal consistency checks, cross-links | [`repowiki/quality.py`](repowiki/quality.py) — citation validity, dead links, orphans, coverage; backlinks on every page |
 | Baseline + advanced with measured improvement | [`repowiki/baseline.py`](repowiki/baseline.py) vs [`repowiki/advanced.py`](repowiki/advanced.py); numbers in [`evals/report.md`](evals/report.md) |
-| Local evaluation on ≥2 repos with comparison table | [`evals/runner.py`](evals/runner.py) → `evals/report.md` |
+| Evaluation on ≥10 repos (one challenging), comparison table | [`evals/parallel_runner.py`](evals/parallel_runner.py) over 10 public repos (fastapi = the challenging metaprogramming case) → `evals/report.md` |
 | Secret redaction | [`repowiki/secrets.py`](repowiki/secrets.py) — content is scanned **before** anything reaches an LLM prompt |
 | Agent trajectories | `trajectories/*.jsonl` — every in-product LLM call, citation resolution and repair, per run |
 

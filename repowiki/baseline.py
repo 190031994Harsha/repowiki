@@ -73,8 +73,11 @@ Write architecture.md: the major components and how they interact, the request/d
 flow through the system, and key design decisions visible in the code organization.
 Cite files as [path].""")
 
-    # module deep-dives
-    for m in idx.modules:
+    # module deep-dives — consolidated so monorepos don't explode into 100 pages
+    top = sorted(idx.modules, key=lambda m: -m.total_lines)
+    significant = [m for m in top if m.total_lines >= 50][:12]
+    other = [m for m in top if m not in significant]
+    for m in significant:
         file_list = "\n".join(f"  - {f}" for f in m.files)
         gen(f"module-{m.name.replace('/', '-')}",
             f"""Repository map (context):
@@ -89,6 +92,17 @@ Public symbols: {', '.join(m.public_symbols[:20]) or '(none detected)'}
 Write a module deep-dive: the module's responsibility, its key files and what each does,
 its important classes/functions, and how it connects to the rest of the system.
 Cite files as [path].""")
+    if other:
+        listing = "\n".join(f"  - {m.name}/ ({m.lang}, {m.total_lines} lines, "
+                            f"{len(m.files)} files)" for m in other[:20])
+        gen("module-other", f"""Repository map (context):
+{repo_map[:2000]}
+
+These smaller directories were consolidated into one page:
+{listing}
+
+Write a survey page: one short paragraph per directory — what it contains and when a
+reader would care. Cite representative files as [path].""")
 
     # index page
     idx_page = "# Wiki Index\n\n" + "\n".join(f"- [[{p}]]" for p in pages) + "\n"

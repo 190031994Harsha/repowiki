@@ -58,6 +58,46 @@ deterministic layer guarantees.
 
 ---
 
+## [5] Full 10-repo eval → three bugs found in the *measurement*, not the model — 2026-08-29
+
+**Change:** ran the 10-repo eval (baseline + advanced, 20 runs). Three findings, all
+infrastructure honesty bugs, all fixed before publishing numbers:
+
+1. **src-layout blind spot** — fastapi indexed as "3139 files, 16 symbols" because the
+   content cap hit before the walker reached `src/fastapi/`. Fix: code-first priority walk.
+   *(Without this, the "challenging case" would've been documentation of a JS shell.)*
+2. **Citation replace collision** — `text.replace(raw, rendered)` silently left duplicate
+   raw cites unresolved when a symbol appeared twice; the validator then scored them as
+   hallucinations. Fix: positional replacement by match span. Advanced validity recovered
+   (requests 0.81 → ~0.99 expected).
+3. **Validator double-count** — rendered pages still contained `[[sym:...]]` in See-also
+   cross-links; the scorer re-resolved them as fresh citations. Fix: don't re-reject what
+   the resolver already handled.
+
+**Evidence:** `evals/report.json` (first full run), fixes verified by re-ingest + tests.
+
+**Learning (feeds the hot take):** every one of these looked, in the output, like a *model*
+failure (low validity, tiny symbol count). All three were *measurement* failures. The first
+hour of any "the agent got worse" debugging should be spent on the harness, not the model.
+
+---
+
+## [6] Module consolidation for monorepo-scale repos — 2026-08-29
+
+**Change:** baseline and advanced both cap per-directory deep-dives at the 12 largest
+clusters and consolidate the long tail into a `module-other` survey page.
+
+**Evidence that drove it:** fastapi (the deliberately challenging case) has ~100
+directory clusters (docs examples, test fixtures); uncapped, the generator wrote 100+
+pages, ran past 30 minutes, and the useful signal drowned in per-example trivia. The
+fix is a *scope* decision, not a quality compromise: the 12 biggest clusters carry the
+architecture; the tail gets an honest survey.
+
+**Learning:** the right wiki for a monorepo is not "more pages." Coverage that costs the
+reader an hour of navigation fails the user even when every citation is valid.
+
+---
+
 ## Main failure mode
 
 On metaprogramming-heavy repos (decorator-registered routes, dynamic imports), the static

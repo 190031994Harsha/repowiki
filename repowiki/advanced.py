@@ -147,13 +147,21 @@ def generate_advanced(idx: RepoIndex, out_dir: Path, llm: LLM,
 
     repo_map = render_repo_map(idx)
     plan = _plan(idx, llm)
-    # coverage by construction: any non-trivial module the planner skipped gets a page
+    # coverage by construction: any non-trivial module the planner skipped gets a page —
+    # capped so monorepos consolidate instead of exploding into 100 module pages
     planned_modules = {p.get("module") for p in plan if p.get("kind") == "module"}
-    for m in idx.modules:
-        if m.total_lines >= 30 and m.name not in planned_modules:
-            plan.append({"name": f"module-{m.name.replace('/', '-')}", "kind": "module",
-                         "module": m.name, "focus": "the essentials"})
-            traj.event("plan_backfill", {"module": m.name})
+    backfill = [m for m in sorted(idx.modules, key=lambda x: -x.total_lines)
+                if m.total_lines >= 50 and m.name not in planned_modules]
+    cap = max(0, 12 - len(planned_modules))
+    for m in backfill[:cap]:
+        plan.append({"name": f"module-{m.name.replace('/', '-')}", "kind": "module",
+                     "module": m.name, "focus": "the essentials"})
+        traj.event("plan_backfill", {"module": m.name})
+    skipped = backfill[cap:]
+    if skipped:
+        plan.append({"name": "module-other", "kind": "survey",
+                     "focus": ", ".join(m.name for m in skipped[:20])})
+        traj.event("plan_consolidated", {"modules": [m.name for m in skipped]})
     traj.event("plan", {"pages": [p["name"] for p in plan]})
     page_names = [p["name"] for p in plan]
     written: dict[str, str] = {}
@@ -220,6 +228,15 @@ every hop with [[sym:...]]. Include one ```mermaid flowchart LR diagram."""
 Write onboarding.md: the reading path for a new engineer (which pages/files first),
 how to run the project, the first good issue-sized area to explore, common gotchas
 visible in the code. Cite with [[sym:...]] and [path]."""
+        elif kind == "survey":
+            prompt = f"""Repository map (context):
+{repo_map[:2500]}
+
+These smaller directories share one survey page:
+{spec.get('focus','')}
+
+Write module-other.md: one short paragraph per directory — what it contains, when a
+reader would care, representative [file] cites. No deep dives."""
         elif name == "glossary":
             terms = [q for q in idx.symbols
                      if idx.symbols[q].kind in ("class",) and not q.split(".")[-1].startswith("_")][:40]
