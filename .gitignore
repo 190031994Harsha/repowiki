@@ -3,7 +3,8 @@
 __pycache__/
 *.pyc
 .pytest_cache/
-trajectories/*.jsonl
+# trajectories are submitted evidence — track them
+# trajectories/*.jsonl
 !trajectories/.gitkeep
 evals/report.json
 evals/wikis/
