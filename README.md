@@ -55,7 +55,21 @@ line ranges*. repowiki's answer is structural, not prompt-based:
 | Page plan | fixed template | planner LLM, backfilled for full module coverage |
 | Verification | resolve-only | reject-and-repair loop on bad citations |
 | Extras | — | data-flow from the real call graph (+ mermaid), glossary, backlinks, orphan detection |
-| Results | see [`evals/report.md`](evals/report.md) | same table, same repos, same scorer |
+
+**Measured over 10 public repos × 2 modes (20 runs, deepseek-v3, temp 0 — full detail in
+[`evals/report.md`](evals/report.md)):**
+
+| Metric | Baseline | Advanced | Δ |
+|---|---|---|---|
+| **Citations with exact line ranges** | **0.00** | **0.75** | **+0.75** |
+| Citation validity (resolve to real code) | 0.92 | 0.96 | +0.04 |
+| Symbol coverage | 0.35 | 0.47 | +0.12 |
+| Mean cost per wiki | $0.009 | $0.049 | +$0.04 |
+| Mean wall time per wiki | 172s | 448s | +276s |
+
+The trade is explicit: ~4x cost and ~2.5x time buys line-range grounding on
+three-quarters of all citations with *higher* validity than the cheaper baseline — the
+repair loop catches the errors the fast path misses.
 
 ## Quickstart
 
