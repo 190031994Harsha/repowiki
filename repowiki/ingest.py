@@ -11,6 +11,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -78,13 +79,8 @@ def ingest(source: str, cache_dir: Path | None = None) -> Repo:
 
     if re.match(r"^(https?://|git@)", source):
         name = re.sub(r"\.git$", "", source.rstrip("/")).split("/")[-1]
-        dest = cache_dir / name
-        if dest.exists():
-            # Windows: git pack files are read-only -> rmtree needs a writable-fix handler
-            def _fix_readonly(func, p, _exc):
-                os.chmod(p, 0o666)
-                func(p)
-            shutil.rmtree(dest, onexc=_fix_readonly)
+        # unique per-invocation: parallel eval workers never share a clone dir
+        dest = cache_dir / f"{name}-{os.getpid()}-{int(time.time())}"
         subprocess.run(["git", "clone", "--depth", "1", source, str(dest)],
                        check=True, capture_output=True, text=True)
         root = dest
@@ -106,6 +102,9 @@ def ingest(source: str, cache_dir: Path | None = None) -> Repo:
             pass
 
     total = 0
+    # Priority walk: code files first (sorted by depth so package roots come early),
+    # so the content budget is spent on source, not docs/tests encountered first.
+    entries = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for fn in filenames:
@@ -117,17 +116,22 @@ def ingest(source: str, cache_dir: Path | None = None) -> Repo:
             except OSError:
                 continue
             lang = LANG_BY_EXT.get(ext, "Other")
-            content = ""
-            lines = 0
-            if ext not in BINARY_EXT and size <= MAX_FILE_BYTES and total < MAX_TOTAL_BYTES:
-                try:
-                    content = full.read_text(encoding="utf-8", errors="replace")
-                    lines = content.count("\n") + (1 if content else 0)
-                    total += size
-                except OSError:
-                    content = ""
-            repo.files.append(RepoFile(path=rel, lang=lang, size=size, lines=lines,
-                                       content=content))
+            is_code = lang in CODE_LANGS
+            entries.append((full, rel, ext, size, lang, is_code))
+    entries.sort(key=lambda e: (not e[5], e[1].count("/"), e[1]))
+
+    for full, rel, ext, size, lang, is_code in entries:
+        content = ""
+        lines = 0
+        if ext not in BINARY_EXT and size <= MAX_FILE_BYTES and total < MAX_TOTAL_BYTES:
+            try:
+                content = full.read_text(encoding="utf-8", errors="replace")
+                lines = content.count("\n") + (1 if content else 0)
+                total += size
+            except OSError:
+                content = ""
+        repo.files.append(RepoFile(path=rel, lang=lang, size=size, lines=lines,
+                                   content=content))
     repo.files.sort(key=lambda f: f.path)
 
     repo.secret_findings = scan_files(repo.file_map())

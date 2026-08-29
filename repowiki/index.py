@@ -88,6 +88,8 @@ def build_index(repo: Repo) -> RepoIndex:
         fp = parse_file(f.path, f.lang, f.content)
         idx.parses[f.path] = fp
         for sym in fp.symbols:
+            if not sym.name or not sym.qualname:
+                continue
             if sym.qualname in idx.symbols:
                 # collision: keep first, note both under name
                 pass

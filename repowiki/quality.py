@@ -36,6 +36,9 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
     problems = []
     for name, text in pages.items():
         for c in extract(text):
+            # after resolve_all ran, ok cites became `path:a-b`/`path`; raw [[sym:]] that
+            # REMAIN in the text are ones the resolver already rejected — count as invalid
+            # here but don't double-reject (resolver logged them at generation time).
             total_c += 1
             r = resolve(c, idx)
             if r.status == "ok":

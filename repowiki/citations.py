@@ -97,10 +97,27 @@ def resolve(c: Citation, idx: RepoIndex, trajectory=None) -> Citation:
 
 
 def resolve_all(text: str, idx: RepoIndex, trajectory=None) -> tuple[str, list[Citation]]:
-    """Resolve every citation in `text`, replacing raw refs with rendered ones."""
-    cites = [resolve(c, idx, trajectory) for c in extract(text)]
-    for c in cites:
-        text = text.replace(c.raw, c.render(), 1)
+    """Resolve every citation in `text`, replacing raw refs with rendered ones.
+
+    Replaces by match position (not text.replace) so repeated identical raw cites
+    each resolve correctly instead of the first replacement hiding the rest.
+    """
+    # collect (span, citation) for all three syntaxes
+    matches = []
+    for rx, kind in ((PATH_SYMBOL_RX, "path_symbol"), (SYMBOL_CITE_RX, "symbol"),
+                     (FILE_CITE_RX, "file")):
+        for m in rx.finditer(text):
+            if kind == "file" and f"{m.group(1)}::" in text:
+                continue
+            ref = f"{m.group(1)}::{m.group(2)}" if kind == "path_symbol" else m.group(1)
+            matches.append((m.start(), m.end(), Citation(raw=m.group(0), ref=ref, kind=kind)))
+    matches.sort(key=lambda x: x[0])
+    cites = []
+    for start, end, c in matches:
+        cites.append(resolve(c, idx, trajectory))
+    # rebuild from the end so offsets stay valid
+    for (start, end, _), c in zip(reversed(matches), reversed(cites)):
+        text = text[:start] + c.render() + text[end:]
     return text, cites
 
 

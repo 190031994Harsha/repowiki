@@ -111,7 +111,10 @@ def _scan(path: str, content: str, lang: str, import_rx, def_rx) -> FileParse:
         for m in import_rx.finditer(line):
             fp.imports.append(m.group(1))
         for m in def_rx.finditer(line):
-            kind, name = m.group(1), m.group(2)
+            kind = m.group(1) or "function"
+            name = m.group(2) or m.group(3) if m.lastindex >= 3 else m.group(2)
+            if not name:
+                continue
             fp.symbols.append(Symbol(name, f"{module}.{name}", kind, path, i, i))
     return fp
 
