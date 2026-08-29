@@ -76,3 +76,20 @@ def test_secret_scan():
 def test_secret_redaction_blocks_prompt_content(idx):
     # the fixture contains a fake AWS key; ingest must flag it
     assert any("app/secrets.py" in k for k in idx.repo.secret_findings)
+
+
+def test_citations_skip_code_fences(idx):
+    """Mermaid diagrams use [[...]] too — they must NOT be treated as citations."""
+    text = ("Flow:\n```mermaid\nA[[app.main.run]] --> B[[app.util.transform]]\n```\n"
+            "Real cite: [[sym:app.main.run]].")
+    rendered, cites = resolve_all(text, idx)
+    # only the prose cite resolves; the mermaid [[...]] are untouched
+    assert len(cites) == 1
+    assert "```mermaid\nA[[app.main.run]]" in rendered  # diagram intact
+    assert "app/main.py:" in rendered  # prose cite resolved
+
+
+def test_repeated_citation_resolves_all(idx):
+    text = "[[sym:app.main.run]] and again [[sym:app.main.run]]."
+    rendered, cites = resolve_all(text, idx)
+    assert rendered.count("app/main.py:") == 2

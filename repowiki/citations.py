@@ -45,17 +45,17 @@ class Citation:
 
 
 def extract(text: str) -> list[Citation]:
+    fences = _code_fence_spans(text)
     out = []
-    for m in PATH_SYMBOL_RX.finditer(text):
-        out.append(Citation(raw=m.group(0), ref=f"{m.group(1)}::{m.group(2)}",
-                            kind="path_symbol"))
-    for m in SYMBOL_CITE_RX.finditer(text):
-        out.append(Citation(raw=m.group(0), ref=m.group(1), kind="symbol"))
-    for m in FILE_CITE_RX.finditer(text):
-        # skip the path half of a path::symbol cite (already captured)
-        if f"{m.group(1)}::" in text:
-            continue
-        out.append(Citation(raw=m.group(0), ref=m.group(1), kind="file"))
+    for rx, kind in ((PATH_SYMBOL_RX, "path_symbol"), (SYMBOL_CITE_RX, "symbol"),
+                     (FILE_CITE_RX, "file")):
+        for m in rx.finditer(text):
+            if any(a <= m.start() < b for a, b in fences):
+                continue
+            if kind == "file" and f"{m.group(1)}::" in text:
+                continue
+            ref = f"{m.group(1)}::{m.group(2)}" if kind == "path_symbol" else m.group(1)
+            out.append(Citation(raw=m.group(0), ref=ref, kind=kind))
     return out
 
 
@@ -96,17 +96,32 @@ def resolve(c: Citation, idx: RepoIndex, trajectory=None) -> Citation:
     return c
 
 
+def _code_fence_spans(text: str) -> list[tuple[int, int]]:
+    """Spans of ``` fenced blocks — citations inside them are diagram syntax, not ours."""
+    spans = []
+    for m in re.finditer(r"```.*?```", text, re.S):
+        spans.append((m.start(), m.end()))
+    return spans
+
+
 def resolve_all(text: str, idx: RepoIndex, trajectory=None) -> tuple[str, list[Citation]]:
     """Resolve every citation in `text`, replacing raw refs with rendered ones.
 
     Replaces by match position (not text.replace) so repeated identical raw cites
     each resolve correctly instead of the first replacement hiding the rest.
+    Skips citations inside ``` fenced code blocks (mermaid diagrams use [[...]] too).
     """
-    # collect (span, citation) for all three syntaxes
+    fences = _code_fence_spans(text)
+
+    def in_fence(pos: int) -> bool:
+        return any(a <= pos < b for a, b in fences)
+
     matches = []
     for rx, kind in ((PATH_SYMBOL_RX, "path_symbol"), (SYMBOL_CITE_RX, "symbol"),
                      (FILE_CITE_RX, "file")):
         for m in rx.finditer(text):
+            if in_fence(m.start()):
+                continue
             if kind == "file" and f"{m.group(1)}::" in text:
                 continue
             ref = f"{m.group(1)}::{m.group(2)}" if kind == "path_symbol" else m.group(1)
