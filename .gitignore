@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+trajectories/*.jsonl
+!trajectories/.gitkeep
+evals/report.json
+evals/wikis/
+examples/*/
+!examples/.gitkeep

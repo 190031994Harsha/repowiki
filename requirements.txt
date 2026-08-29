@@ -1,0 +1,4 @@
+# Pinned for reproducibility. Python 3.11+.
+openai==1.57.4        # OpenAI-compatible client (OpenRouter / local proxies)
+anthropic==0.40.0     # optional direct provider
+pyyaml==6.0.2
