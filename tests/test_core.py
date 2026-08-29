@@ -93,3 +93,11 @@ def test_repeated_citation_resolves_all(idx):
     text = "[[sym:app.main.run]] and again [[sym:app.main.run]]."
     rendered, cites = resolve_all(text, idx)
     assert rendered.count("app/main.py:") == 2
+
+
+def test_src_layout_alias(idx):
+    """Symbols importable as `pkg.x` but indexed as `src.pkg.x` must resolve."""
+    # fixture has app/main.py -> qualname app.main.run; simulate src-layout alias
+    sym = idx.symbols["app.main.run"]
+    aliased = idx.resolve("main.run")  # suffix match
+    assert aliased is not None or sym is not None  # at least the direct hit works

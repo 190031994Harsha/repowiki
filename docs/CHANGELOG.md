@@ -98,6 +98,23 @@ reader an hour of navigation fails the user even when every citation is valid.
 
 ---
 
+## [7] src-layout alias resolution — 2026-08-29
+
+**Change:** the resolver now maps importable package names (`flask.app.Flask`) to their
+src-layout indexed forms (`src.flask.app.Flask`) via prefix aliasing + unique suffix match.
+
+**Evidence that drove it:** the flask re-run after the fence fix still showed 13
+unresolved citations — all of them *correct* LLM citations (`flask.sessions.SecureCookieSession`)
+rejected because the index stored `src.flask.sessions.SecureCookieSession`. The model was
+right; the index was wrong. Fixed in the resolver, verified live:
+`flask.app.Flask -> src/flask/app.py:110-1628`.
+
+**Learning (the hot take, sharpened):** twice this weekend the "model error rate" was a
+grounding-layer assumption (exact-match qualnames, code-fence blindness) masquerading as
+one. The repair loop is only as honest as the index behind it.
+
+---
+
 ## Main failure mode
 
 On metaprogramming-heavy repos (decorator-registered routes, dynamic imports), the static

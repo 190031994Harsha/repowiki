@@ -37,11 +37,25 @@ class RepoIndex:
 
     # ---- lookups used by the citation resolver ----
     def resolve(self, ref: str) -> Symbol | None:
-        """Resolve a citation target. Accepts qualname, simple name (if unique), or path."""
+        """Resolve a citation target. Accepts qualname, simple name (if unique), or path.
+
+        Handles src-layout: the importable package is `flask` but symbols are indexed
+        as `src.flask.*` — a cite of `flask.app.Flask` must resolve to
+        `src.flask.app.Flask`, not be rejected.
+        """
         if ref in self.symbols:
             return self.symbols[ref]
         if ref in self.by_name and len(self.by_name[ref]) == 1:
             return self.symbols[self.by_name[ref][0]]
+        # src-layout alias: try prefixing with each known top-level dir
+        for prefix in ("src.", "lib.", "app."):
+            if not ref.startswith(prefix) and (prefix + ref) in self.symbols:
+                return self.symbols[prefix + ref]
+        # dotted simple name at any depth: "app.Flask" -> "src.flask.app.Flask"
+        if "." in ref:
+            matches = [q for q in self.symbols if q.endswith("." + ref) or q == ref]
+            if len(matches) == 1:
+                return self.symbols[matches[0]]
         # path:line or path form -> the file's module symbol
         path = ref.split(":")[0]
         for qual, sym in self.symbols.items():

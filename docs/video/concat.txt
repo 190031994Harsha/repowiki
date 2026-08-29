@@ -1,0 +1,15 @@
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/01_title.png'
+duration 8
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/02_problem.png'
+duration 30
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/03_baseline.png'
+duration 45
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/04_design.png'
+duration 40
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/05_trajectory.png'
+duration 80
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/06_results.png'
+duration 60
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/07_close.png'
+duration 35
+file 'C:/Users/Lenovo/Projects/repowiki/docs/video/frames/07_close.png'
