@@ -77,10 +77,10 @@ def resolve(c: Citation, idx: RepoIndex, trajectory=None) -> Citation:
         if sym:
             c.status, c.file = "ok", sym.file
             c.line_start, c.line_end = sym.line_start, sym.line_end
-        elif path in have:
-            c.status, c.file = "ok", path   # degrade gracefully to file-level
-            c.line_start, c.line_end = 1, idx.file_lines(path)
         else:
+            # TEETH: a missing symbol on an existing file is UNRESOLVED, not a silent
+            # degrade to whole-file. A wrong 1-EOF range dressed as a symbol cite is the
+            # exact failure we exist to prevent. Fail -> repair loop.
             c.status = "unresolved"
     else:  # symbol
         sym = idx.resolve(c.ref)

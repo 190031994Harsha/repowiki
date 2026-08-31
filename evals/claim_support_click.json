@@ -1,0 +1,239 @@
+{
+ "wiki": "evals/wikis/click-advanced",
+ "repo": "https://github.com/pallets/click",
+ "judge_model": "deepseek/deepseek-chat-v3-0324",
+ "n": 25,
+ "tally": {
+  "UNSUPPORTED": 6,
+  "SUPPORTED": 12,
+  "PARTIAL": 7
+ },
+ "claim_support_precision": 0.62,
+ "verdicts": [
+  {
+   "page": "module-examples-completion",
+   "claim": "The most advanced pattern uses",
+   "file": "examples/completion/completion.py",
+   "a": 36,
+   "b": 47,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt shows basic completion, not 'most advanced'"
+  },
+  {
+   "page": "glossary",
+   "claim": "ShellComplete**: Base completion handler",
+   "file": "src/click/shell_completion.py",
+   "a": 278,
+   "b": 386,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows ShellComplete base class"
+  },
+  {
+   "page": "glossary",
+   "claim": "Repo**: Repository abstraction",
+   "file": "examples/repo/repo.py",
+   "a": 8,
+   "b": 20,
+   "verdict": "PARTIAL",
+   "reason": "Shows a Repo class but not abstraction"
+  },
+  {
+   "page": "glossary",
+   "claim": "Environment**: CLI execution environment container",
+   "file": "examples/complex/complex/cli.py",
+   "a": 10,
+   "b": 24,
+   "verdict": "PARTIAL",
+   "reason": "Environment class exists but not a container"
+  },
+  {
+   "page": "glossary",
+   "claim": "ComplexCLI**: Multi-component CLI interface",
+   "file": "examples/complex/complex/cli.py",
+   "a": 31,
+   "b": 45,
+   "verdict": "SUPPORTED",
+   "reason": "Shows multi-component CLI structure"
+  },
+  {
+   "page": "module-tests",
+   "claim": "Ensures proper deprecation warnings (",
+   "file": "tests/test_options.py",
+   "a": 76,
+   "b": 94,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows deprecation warning tests"
+  },
+  {
+   "page": "module-examples-completion",
+   "claim": "Custom completion with help text (",
+   "file": "examples/completion/completion.py",
+   "a": 52,
+   "b": 53,
+   "verdict": "UNSUPPORTED",
+   "reason": "No help text shown"
+  },
+  {
+   "page": "module-examples-completion",
+   "claim": "File/directory path completion (",
+   "file": "examples/completion/completion.py",
+   "a": 14,
+   "b": 15,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt shows directory listing, not path completion"
+  },
+  {
+   "page": "glossary",
+   "claim": "Config**: Configuration object supporting aliases",
+   "file": "examples/aliases/aliases.py",
+   "a": 7,
+   "b": 31,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows Config supports aliases"
+  },
+  {
+   "page": "glossary",
+   "claim": "AliasedGroup**: Command group with alias support",
+   "file": "examples/aliases/aliases.py",
+   "a": 37,
+   "b": 73,
+   "verdict": "SUPPORTED",
+   "reason": "Class implements alias support as claimed"
+  },
+  {
+   "page": "module-tests",
+   "claim": "Validates complex parameter combinations (",
+   "file": "tests/test_options.py",
+   "a": 239,
+   "b": 258,
+   "verdict": "PARTIAL",
+   "reason": "Tests defaults, not complex combinations"
+  },
+  {
+   "page": "glossary",
+   "claim": "HelpFormatter**: Help text generator",
+   "file": "src/click/formatting.py",
+   "a": 110,
+   "b": 299,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt confirms HelpFormatter generates help text"
+  },
+  {
+   "page": "glossary",
+   "claim": "URL**: Validated URL type",
+   "file": "examples/validation/validation.py",
+   "a": 12,
+   "b": 24,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows URL validation"
+  },
+  {
+   "page": "module-examples-colors",
+   "claim": "The module's sole function",
+   "file": "examples/colors/colors.py",
+   "a": 25,
+   "b": 39,
+   "verdict": "PARTIAL",
+   "reason": "Only shows one function, but not sole"
+  },
+  {
+   "page": "glossary",
+   "claim": "Group**: Command container",
+   "file": "src/click/core.py",
+   "a": 1649,
+   "b": 2109,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt defines Group class"
+  },
+  {
+   "page": "module-tests-test_utils",
+   "claim": "Input Simulation** - Tests like",
+   "file": "tests/test_utils/test_echo.py",
+   "a": 93,
+   "b": 95,
+   "verdict": "PARTIAL",
+   "reason": "Shows input emulation, but not test usage"
+  },
+  {
+   "page": "glossary",
+   "claim": "Option**: Named parameter",
+   "file": "src/click/core.py",
+   "a": 2858,
+   "b": 3660,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt does not mention named parameters"
+  },
+  {
+   "page": "glossary",
+   "claim": "TextWrapper**: Text formatting utility",
+   "file": "src/click/_textwrap.py",
+   "a": 38,
+   "b": 188,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows TextWrapper utility"
+  },
+  {
+   "page": "glossary",
+   "claim": "Parameter**: CLI input specification",
+   "file": "src/click/core.py",
+   "a": 2187,
+   "b": 2855,
+   "verdict": "PARTIAL",
+   "reason": "Excerpt shows Parameter class but not CLI input specifics"
+  },
+  {
+   "page": "module-examples-inout",
+   "claim": "The module's functionality is entirely contained in the",
+   "file": "examples/inout/inout.py",
+   "a": 7,
+   "b": 30,
+   "verdict": "PARTIAL",
+   "reason": "Excerpt shows core functionality but not entire module"
+  },
+  {
+   "page": "module-examples-imagepipe",
+   "claim": "The main pipeline is built using",
+   "file": "examples/imagepipe/imagepipe.py",
+   "a": 11,
+   "b": 20,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt describes CLI, not main pipeline"
+  },
+  {
+   "page": "glossary",
+   "claim": "Sentinel**: Special marker value",
+   "file": "src/click/_utils.py",
+   "a": 7,
+   "b": 19,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt defines Sentinel as special marker values"
+  },
+  {
+   "page": "glossary",
+   "claim": "CommandCollection**: Multi-source command aggregator",
+   "file": "src/click/core.py",
+   "a": 2119,
+   "b": 2174,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows multi-source command aggregation"
+  },
+  {
+   "page": "module-examples-naval",
+   "claim": "Users interact with the root",
+   "file": "examples/naval/naval.py",
+   "a": 6,
+   "b": 12,
+   "verdict": "UNSUPPORTED",
+   "reason": "No root interaction shown"
+  },
+  {
+   "page": "glossary",
+   "claim": "ParameterSource**: Origin of parameter values",
+   "file": "src/click/core.py",
+   "a": 169,
+   "b": 205,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt defines ParameterSource enum"
+  }
+ ]
+}

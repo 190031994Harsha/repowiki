@@ -1,0 +1,96 @@
+{
+ "gpt55pro": {
+  "status": "error",
+  "model": "openai/gpt-5.5-pro",
+  "started": 1788154508.31204,
+  "error": "<HTTPError 404: 'Not Found'>",
+  "wall_s": 0.2
+ },
+ "gpt56sol": {
+  "status": "done",
+  "model": "openai/gpt-5.6-sol",
+  "started": 1788154508.31204,
+  "wall_s": 78.2,
+  "tokens": 20638,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\gpt56sol.md"
+ },
+ "opus5": {
+  "status": "done",
+  "model": "anthropic/claude-opus-5",
+  "started": 1788154508.3130515,
+  "wall_s": 101.1,
+  "tokens": 30933,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\opus5.md"
+ },
+ "fable5": {
+  "status": "error",
+  "model": "anthropic/claude-fable-5",
+  "started": 1788154508.3130515,
+  "error": "<HTTPError 404: 'Not Found'>",
+  "wall_s": 0.2
+ },
+ "kimik3": {
+  "status": "done",
+  "model": "moonshotai/kimi-k3",
+  "started": 1788154508.3140497,
+  "wall_s": 385.4,
+  "tokens": 28077,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\kimik3.md"
+ },
+ "grok46": {
+  "status": "done",
+  "model": "x-ai/grok-4.6",
+  "started": 1788154508.3140497,
+  "wall_s": 133.8,
+  "tokens": 24507,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\grok46.md"
+ },
+ "deepseekv4": {
+  "status": "done",
+  "model": "deepseek/deepseek-v4-pro",
+  "started": 1788154508.3160472,
+  "wall_s": 77.2,
+  "tokens": 20702,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\deepseekv4.md"
+ },
+ "gemini31": {
+  "status": "done",
+  "model": "google/gemini-3.1-pro-preview",
+  "started": 1788154508.317038,
+  "wall_s": 29.2,
+  "tokens": 21224,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\gemini31.md"
+ },
+ "qwen3max": {
+  "status": "done",
+  "model": "qwen/qwen3-max-thinking",
+  "started": 1788154508.317038,
+  "wall_s": 30.8,
+  "tokens": 17544,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\qwen3max.md"
+ },
+ "glm53": {
+  "status": "error",
+  "model": "z-ai/glm-5.3",
+  "started": 1788154508.3180425,
+  "wall_s": 227.8,
+  "tokens": 32026,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\glm53.md",
+  "error": "TypeError(\"object of type 'NoneType' has no len()\")"
+ },
+ "gpt55": {
+  "status": "done",
+  "model": "openai/gpt-5.5",
+  "started": 1788154748.0144992,
+  "wall_s": 52.8,
+  "tokens": 20270,
+  "out": "C:\\Users\\Lenovo\\Projects\\repowiki\\docs\\judges\\gpt55.md"
+ },
+ "o3pro": {
+  "status": "error",
+  "model": "openai/o3-pro",
+  "started": 1788154748.0144992,
+  "error": "<HTTPError 404: 'Not Found'>",
+  "wall_s": 0.2
+ }
+}

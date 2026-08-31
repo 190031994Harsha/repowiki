@@ -1,0 +1,239 @@
+{
+ "wiki": "evals/wikis/flask-advanced",
+ "repo": "https://github.com/pallets/flask",
+ "judge_model": "deepseek/deepseek-chat-v3-0324",
+ "n": 25,
+ "tally": {
+  "SUPPORTED": 16,
+  "UNSUPPORTED": 4,
+  "PARTIAL": 5
+ },
+ "claim_support_precision": 0.74,
+ "verdicts": [
+  {
+   "page": "module-tests",
+   "claim": "Context Verification**: Many tests verify context behavior (",
+   "file": "tests/test_templating.py",
+   "a": 42,
+   "b": 50,
+   "verdict": "SUPPORTED",
+   "reason": "Test verifies context behavior"
+  },
+  {
+   "page": "module-src-flask-sansio",
+   "claim": "All scaffolded methods use",
+   "file": "src/flask/sansio/scaffold.py",
+   "a": 42,
+   "b": 49,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt shows decorator, not scaffolded methods"
+  },
+  {
+   "page": "module-src-flask-json",
+   "claim": "For complex serialization cases, Flask provides",
+   "file": "src/flask/json/tag.py",
+   "a": 219,
+   "b": 327,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows Flask's TaggedJSONSerializer for complex types"
+  },
+  {
+   "page": "module-examples-celery-src-task-app",
+   "claim": "Custom `FlaskTask` class that ensures tasks run with app context",
+   "file": "examples/celery/src/task_app/__init__.py",
+   "a": 30,
+   "b": 33,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows FlaskTask ensures app context"
+  },
+  {
+   "page": "data-flow",
+   "claim": "Request routing and view execution in",
+   "file": "src/flask/app.py",
+   "a": 969,
+   "b": 993,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows request routing and view execution"
+  },
+  {
+   "page": "module-examples-celery-src-task-app",
+   "claim": "Celery-Flask Integration**: Provides a clean pattern for initializing Celery within a Flask app context",
+   "file": "examples/celery/src/task_app/__init__.py",
+   "a": 29,
+   "b": 39,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows Celery initialization with Flask context"
+  },
+  {
+   "page": "module-examples-javascript-tests",
+   "claim": "provides a testing-configured Flask application instance, while",
+   "file": "examples/javascript/tests/conftest.py",
+   "a": 14,
+   "b": 15,
+   "verdict": "PARTIAL",
+   "reason": "shows test client, not full app config"
+  },
+  {
+   "page": "data-flow",
+   "claim": "The main request handling occurs in",
+   "file": "src/flask/app.py",
+   "a": 995,
+   "b": 1022,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows main request handling flow"
+  },
+  {
+   "page": "module-tests",
+   "claim": "Error handling hierarchy (",
+   "file": "tests/test_blueprints.py",
+   "a": 7,
+   "b": 42,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt demonstrates blueprint-specific error handling hierarchy"
+  },
+  {
+   "page": "module-src-flask",
+   "claim": "Manages application contexts via",
+   "file": "src/flask/ctx.py",
+   "a": 260,
+   "b": 525,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows AppContext management"
+  },
+  {
+   "page": "module-tests-type_check",
+   "claim": "Generator/iterator responses",
+   "file": "tests/type_check/typing_route.py",
+   "a": 51,
+   "b": 56,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows generator function returning strings"
+  },
+  {
+   "page": "module-examples-tutorial-tests",
+   "claim": "Authentication Flow**: The",
+   "file": "examples/tutorial/tests/conftest.py",
+   "a": 61,
+   "b": 62,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt does not describe authentication flow"
+  },
+  {
+   "page": "module-examples-celery-src-task-app",
+   "claim": "The `create_app()` function",
+   "file": "examples/celery/src/task_app/__init__.py",
+   "a": 7,
+   "b": 26,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows create_app() function"
+  },
+  {
+   "page": "module-src-flask-json",
+   "claim": "Each tag class inherits from",
+   "file": "src/flask/json/tag.py",
+   "a": 60,
+   "b": 90,
+   "verdict": "SUPPORTED",
+   "reason": "JSONTag is base class"
+  },
+  {
+   "page": "module-examples-tutorial-flaskr",
+   "claim": "Login/logout functionality (",
+   "file": "examples/tutorial/flaskr/auth.py",
+   "a": 85,
+   "b": 109,
+   "verdict": "PARTIAL",
+   "reason": "Only login shown, no logout"
+  },
+  {
+   "page": "module-tests",
+   "claim": "Route Testing**: Most test files define routes (like",
+   "file": "tests/test_basic.py",
+   "a": 35,
+   "b": 36,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt shows a function, not route testing"
+  },
+  {
+   "page": "module-examples-tutorial-tests",
+   "claim": "Fixtures Enable Testing**: The",
+   "file": "examples/tutorial/tests/conftest.py",
+   "a": 16,
+   "b": 32,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows fixture setup for testing"
+  },
+  {
+   "page": "module-examples-celery-src-task-app",
+   "claim": "App Context Handling**: The `FlaskTask` class",
+   "file": "examples/celery/src/task_app/__init__.py",
+   "a": 30,
+   "b": 33,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows FlaskTask handles app context"
+  },
+  {
+   "page": "module-examples-tutorial-tests",
+   "claim": "auth()` fixture: Handles authentication test actions via",
+   "file": "examples/tutorial/tests/conftest.py",
+   "a": 47,
+   "b": 57,
+   "verdict": "PARTIAL",
+   "reason": "Shows auth actions but not fixture"
+  },
+  {
+   "page": "module-src-flask-sansio",
+   "claim": "Enforces setup completion checks via",
+   "file": "src/flask/sansio/scaffold.py",
+   "a": 45,
+   "b": 47,
+   "verdict": "SUPPORTED",
+   "reason": "Excerpt shows setup completion check"
+  },
+  {
+   "page": "data-flow",
+   "claim": "The request processing begins with",
+   "file": "src/flask/app.py",
+   "a": 1504,
+   "b": 1518,
+   "verdict": "PARTIAL",
+   "reason": "Shows request context creation, not full processing"
+  },
+  {
+   "page": "module-examples-tutorial-tests",
+   "claim": "Database Integration**: Tests like",
+   "file": "examples/tutorial/tests/test_blog.py",
+   "a": 46,
+   "b": 54,
+   "verdict": "SUPPORTED",
+   "reason": "Test verifies database count after post creation"
+  },
+  {
+   "page": "module-tests-type_check",
+   "claim": "Template rendering with both sync",
+   "file": "tests/type_check/typing_route.py",
+   "a": 87,
+   "b": 88,
+   "verdict": "UNSUPPORTED",
+   "reason": "Excerpt shows sync rendering only"
+  },
+  {
+   "page": "module-src-flask-json",
+   "claim": "The default implementation",
+   "file": "src/flask/json/provider.py",
+   "a": 124,
+   "b": 215,
+   "verdict": "PARTIAL",
+   "reason": "Excerpt shows JSON operations but not default implementation details"
+  },
+  {
+   "page": "module-tests-type_check",
+   "claim": "Basic responses (str/bytes) via",
+   "file": "tests/type_check/typing_route.py",
+   "a": 17,
+   "b": 18,
+   "verdict": "SUPPORTED",
+   "reason": "Function returns a string"
+  }
+ ]
+}

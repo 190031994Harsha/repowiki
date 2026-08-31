@@ -98,10 +98,15 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
             cited_pub += 1
 
     # ---- structure & readability
+    # strip code, citations, list markers and URLs so sentence-length reflects prose,
+    # not citation density (the 0.00 scores were this splitter choking, not bad prose)
     words, sentences, heading_pages = 0, 0, 0
     for text in pages.values():
         prose = re.sub(r"```.*?```", " ", text, flags=re.S)
-        prose = re.sub(r"`[^`]*`", " ", prose)
+        prose = re.sub(r"`[^`]*`", " ", prose)          # inline code + citations
+        prose = re.sub(r"^\s*[-*]\s+", "", prose, flags=re.M)   # list bullets
+        prose = re.sub(r"\[\[?[^\]]*\]\]?", " ", prose)  # wikilinks
+        prose = re.sub(r"\S+\.(py|js|ts|java|go|rs)", " code ", prose)  # bare paths
         words += len(prose.split())
         sentences += len(re.findall(r"[.!?](?:\s|$)", prose))
         if re.search(r"^##\s", text, re.M):

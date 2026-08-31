@@ -118,10 +118,42 @@ cluster above (skip trivial clusters <30 lines), and a glossary. JSON only.""",
     return plan
 
 
+def _drop_unresolved_sentences(body: str) -> tuple[str, int]:
+    """Fail closed: remove any sentence still carrying an unresolved citation.
+
+    After bounded repair, an unresolvable cite means the model asserted something the
+    index can't back. We drop the sentence rather than ship a dangling reference, so
+    the emitted wiki literally cannot contain a hallucinated citation.
+    Returns (cleaned_body, n_dropped).
+    """
+    dropped = 0
+    out_lines = []
+    for line in body.split("\n"):
+        if "*(unresolved citation)*" in line:
+            # drop the whole sentence(s) on this line that carry the marker
+            kept = []
+            import re as _re
+            for sent in _re.split(r"(?<=[.!?])\s+", line):
+                if "*(unresolved citation)*" in sent:
+                    dropped += 1
+                else:
+                    kept.append(sent)
+            line = " ".join(kept).strip()
+            if not line:
+                continue
+        out_lines.append(line)
+    return "\n".join(out_lines), dropped
+
+
 def _gen_with_repair(idx: RepoIndex, llm: LLM, traj: Trajectory,
                      name: str, prompt: str, stats: dict) -> tuple[str, list]:
-    """Generate a page; if citations don't resolve, send problems back for repair."""
+    """Generate a page; if citations don't resolve, send problems back for repair.
+
+    FAILS CLOSED: after bounded repair, sentences still carrying unresolvable citations
+    are dropped (counted in stats['claims_dropped']) — never rendered as dangling refs.
+    """
     body = ""
+    problems = []
     for attempt in range(3):
         resp = llm.chat(ADV_SYSTEM, prompt if attempt == 0 else
                         prompt + "\n\nPREVIOUS DRAFT HAD UNRESOLVABLE CITATIONS:\n" +
@@ -136,6 +168,11 @@ def _gen_with_repair(idx: RepoIndex, llm: LLM, traj: Trajectory,
         stats["repairs"] += 1
         traj.event("repair", {"page": name, "attempt": attempt,
                               "problems": len(problems)})
+    # fail closed on whatever remains
+    body, n_dropped = _drop_unresolved_sentences(body)
+    if n_dropped:
+        stats["claims_dropped"] = stats.get("claims_dropped", 0) + n_dropped
+        traj.event("fail_closed", {"page": name, "sentences_dropped": n_dropped})
     return body, cites
 
 
@@ -151,7 +188,7 @@ def generate_advanced(idx: RepoIndex, out_dir: Path, llm: LLM,
     # capped so monorepos consolidate instead of exploding into 100 module pages
     planned_modules = {p.get("module") for p in plan if p.get("kind") == "module"}
     backfill = [m for m in sorted(idx.modules, key=lambda x: -x.total_lines)
-                if m.total_lines >= 50 and m.name not in planned_modules]
+                if m.total_lines >= 30 and m.name not in planned_modules]
     cap = max(0, 12 - len(planned_modules))
     for m in backfill[:cap]:
         plan.append({"name": f"module-{m.name.replace('/', '-')}", "kind": "module",
