@@ -2,3 +2,5 @@
 openai==1.57.4        # OpenAI-compatible client (OpenRouter / local proxies)
 anthropic==0.40.0     # optional direct provider
 pyyaml==6.0.2
+python-dotenv==1.0.1  # loads .env so judges don't have to export manually
+pytest==8.3.4         # for `make test`

@@ -53,10 +53,10 @@ Expected tail output:
 Open `examples/requests-advanced/overview.md` — every citation renders as
 `` `path/file.py:12-40` `` and clicking through in any markdown viewer lands on real code.
 
-## 5. The full evaluation (baseline + advanced, both repos)
+## 5. The full evaluation (12 repos × 2 modes)
 
 ```bash
-python -m evals.runner --repos https://github.com/psf/requests,<starter-repo-url>
+python -m evals.parallel_runner 4     # 4 parallel workers; the 12-repo list is built in
 cat evals/report.md
 ```
 

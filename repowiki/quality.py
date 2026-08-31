@@ -66,7 +66,8 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
             sym_c += 1
             total_c += 1
             n = idx.file_lines(path)
-            if n and 1 <= a <= b <= n + 5:
+            # strict: no EOF slack. A range pointing past the last line is invalid.
+            if n and 1 <= a <= b <= n:
                 ok_c += 1
                 cited_ranges.append((path, a, b))
             else:
@@ -95,8 +96,13 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
     all_text = "\n".join(pages.values())
     cited_pub = 0
     for q in pub:
-        sym = idx.symbols[q]
-        if q.split(".")[-1] in all_text:
+        sym = idx.symbols.get(q)
+        if sym is None:      # defensive: a public_symbol that isn't indexed
+            continue
+        # substring is not coverage: require a word-boundary match of the simple name,
+        # else `get` matches "target" and inflates the metric (v3 linereview finding)
+        simple = q.split(".")[-1]
+        if re.search(rf"\b{re.escape(simple)}\b", all_text):
             cited_pub += 1
             continue
         # covered by a rendered range citation that intersects the symbol's span?

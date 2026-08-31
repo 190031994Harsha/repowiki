@@ -40,8 +40,10 @@ def parse_python(path: str, content: str) -> FileParse:
     module = path[:-3].replace("/", ".").replace(".__init__", "")
     try:
         tree = ast.parse(content)
-    except SyntaxError as e:
-        fp.error = f"SyntaxError: {e}"
+    except (SyntaxError, ValueError, RecursionError, MemoryError) as e:
+        # ValueError: NUL bytes; RecursionError/MemoryError: pathological nesting.
+        # One bad file must not crash the whole index run.
+        fp.error = f"{type(e).__name__}: {e}"
         return fp
 
     fp.symbols.append(Symbol(module.split(".")[-1], module, "module", path, 1,
@@ -92,9 +94,15 @@ def parse_python(path: str, content: str) -> FileParse:
                     fp.imports.extend(a.name for a in child.names)
                 else:
                     base = child.module or ""
-                    fp.imports.append(base)
+                    # relative imports: "from . import x" (level=1) anchors at the package
+                    if child.level and not base:
+                        pkg = module.rsplit(".", child.level)[0] if module.count(".") >= child.level else module
+                        base = pkg
+                    if base:
+                        fp.imports.append(base)
                     # "from app import util" may mean app/util.py, not just app/
-                    fp.imports.extend(f"{base}.{a.name}" for a in child.names)
+                    if child.module:  # only for absolute "from X import Y"
+                        fp.imports.extend(f"{base}.{a.name}" for a in child.names)
 
     visit(tree, None)
     return fp

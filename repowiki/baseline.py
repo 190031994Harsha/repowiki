@@ -101,25 +101,48 @@ Write architecture.md: the major components and how they interact, the request/d
 flow through the system, and key design decisions visible in the code organization.
 Cite files as [path].""")
 
-    # module deep-dives — consolidated so monorepos don't explode into 100 pages
+    # module deep-dives — consolidated so monorepos don't explode into 100 pages.
+    # FAIRNESS: the baseline sees the SAME file contents + symbol signatures the advanced
+    # sees. The difference is the *process* (single-pass template, no planner, no repair
+    # loop, naive grep line-ranges) — not the information access. That's what makes the
+    # comparison a measurement of the pipeline, not of who's allowed to read code.
     top = sorted(idx.modules, key=lambda m: -m.total_lines)
     significant = [m for m in top if m.total_lines >= 50][:12]
     other = [m for m in top if m not in significant]
+
+    def module_context(mod) -> str:
+        parts = []
+        for path in mod.files[:6]:
+            content = ""
+            for f in idx.repo.files:
+                if f.path == path:
+                    content = f.content
+                    break
+            excerpt = content[:3000] + ("\n...(truncated)" if len(content) > 3000 else "")
+            parts.append(f"### {path}\n```\n{excerpt}\n```")
+        syms = []
+        for qual in mod.public_symbols[:20]:
+            s = idx.symbols.get(qual)
+            if s:
+                doc = f" — {s.docstring[:60]}" if s.docstring else ""
+                syms.append(f"  - {qual}{s.signature}{doc}")
+        parts.append("Symbol table:\n" + "\n".join(syms))
+        return "\n\n".join(parts)
+
     for m in significant:
-        file_list = "\n".join(f"  - {f}" for f in m.files)
         gen(f"module-{m.name.replace('/', '-')}",
             f"""Repository map (context):
 
-{repo_map[:3000]}
+{repo_map[:2000]}
 
 Module under documentation: {m.name}/ ({m.lang}, {m.total_lines} lines)
-Files:
-{file_list}
-Public symbols: {', '.join(m.public_symbols[:20]) or '(none detected)'}
+
+{module_context(m)}
 
 Write a module deep-dive: the module's responsibility, its key files and what each does,
 its important classes/functions, and how it connects to the rest of the system.
-Cite files as [path].""")
+Cite files as [path] and, where you can, name a function/class with its line as
+[path::name].""")
     if other:
         listing = "\n".join(f"  - {m.name}/ ({m.lang}, {m.total_lines} lines, "
                             f"{len(m.files)} files)" for m in other[:20])

@@ -1,0 +1,52 @@
+{
+ "exec": {
+  "status": "done",
+  "model": "openai/gpt-5.6-sol",
+  "started": 1788162417.39652,
+  "wall_s": 13.5,
+  "tokens": 4506
+ },
+ "fairness": {
+  "status": "done",
+  "model": "deepseek/deepseek-v4-pro",
+  "started": 1788162417.39652,
+  "wall_s": 81.1,
+  "tokens": 9682
+ },
+ "repro": {
+  "status": "done",
+  "model": "google/gemini-3.1-pro-preview",
+  "started": 1788162417.39652,
+  "wall_s": 36.8,
+  "tokens": 7547
+ },
+ "absolutes": {
+  "status": "done",
+  "model": "moonshotai/kimi-k3",
+  "started": 1788162886.1938028,
+  "error": "IncompleteRead(11473 bytes read)",
+  "wall_s": 394.6,
+  "tokens": 14497
+ },
+ "linereview": {
+  "status": "done",
+  "model": "anthropic/claude-opus-5",
+  "started": 1788162417.3975255,
+  "wall_s": 218.4,
+  "tokens": 22107
+ },
+ "video": {
+  "status": "done",
+  "model": "x-ai/grok-4.6",
+  "started": 1788162417.3975255,
+  "wall_s": 64.4,
+  "tokens": 6235
+ },
+ "win2": {
+  "status": "done",
+  "model": "qwen/qwen3-max-thinking",
+  "started": 1788162417.398525,
+  "wall_s": 30.0,
+  "tokens": 4126
+ }
+}
