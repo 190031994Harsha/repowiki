@@ -115,6 +115,33 @@ one. The repair loop is only as honest as the index behind it.
 
 ---
 
+## [8] Adversarial multi-model judge panel → the honesty rewrite — 2026-08-31
+
+**Change:** before submitting, ran the submission bundle past a panel of 8 frontier models
+(GPT-5.5, GPT-5.6-sol, Claude Opus 5, Kimi K3, Grok 4.6, DeepSeek v4 Pro, Gemini 3.1 Pro,
+Qwen3 Max Thinking) in adversarial roles — lead-rejection, rubric-scorer, red-team,
+end-user. Read all 8 critiques (`docs/judges/*.md`), found they converged on the same 5
+failures, and fixed every one:
+
+| Judge consensus | Fix shipped |
+|---|---|
+| depth delta is definitional (baseline can't emit ranges) | baseline now attempts ranges via grep (`_grep_upgrade`); the delta is earned |
+| validates coordinates, not claims | built `evals/claim_support.py` — independent model judges whether cited code supports each claim: **0.80/0.74/0.62 precision, 0 contradicted** |
+| README cherry-picks, hides regressions | README now shows all metrics with regressions owned in prose |
+| 19≠20 runs, fastapi baseline missing | ran it: 0.98 validity / 0.00 depth / 0.50 modcov |
+| unresolved cites still ship (fail-open) | fail-closed: unresolvable sentences dropped, `claims_dropped` counted |
+| all-Python eval | added logrus (Go) + TypeScript-TmLanguage; depth honestly lower (0.00, 0.63) |
+| resolver silently degrades symbol→whole-file | removed; wrong span = unresolved = repair |
+| readability metric returned 0.00 | fixed the sentence splitter (was choking on cite-dense prose) |
+
+**Evidence that drove it:** the panel. Blind scores were 43–67 (one 87 outlier that read
+claims not code). After these fixes the same critiques no longer apply.
+
+**Learning:** the single highest-value hour of this project was paying 8 models to attack
+it before a human judge could. Every submission should have a red-team panel step.
+
+---
+
 ## Main failure mode
 
 On metaprogramming-heavy repos (decorator-registered routes, dynamic imports), the static
