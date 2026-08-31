@@ -16,8 +16,34 @@ from .trajectory import Trajectory
 
 BASELINE_SYSTEM = """You are documenting a code repository for a new engineer.
 Write precise, factual markdown. Cite evidence using [path/to/file.py] notation after
-every non-obvious claim. Only cite files from the provided repository map — never invent
-paths. Keep it readable: short paragraphs, concrete names, no filler."""
+every non-obvious claim, and where you can, name the specific function or class with
+its approximate line number, e.g. [path/to/file.py::function_name]. Only cite files
+from the provided repository map — never invent paths. Keep it readable: short
+paragraphs, concrete names, no filler."""
+
+
+def _grep_upgrade(body: str, idx: RepoIndex) -> str:
+    """Baseline fairness: let the baseline attempt line ranges via a naive grep.
+
+    For each [path::name] cite the model emitted, grep the file for `def name` /
+    `class name` and upgrade the cite to a single-line range. This is the honest naive
+    approach a competent engineer would try first — so the advanced system's depth
+    advantage is earned (accuracy + repair), not definitional.
+    """
+    import re
+    from pathlib import Path
+
+    def upgrade(m):
+        path, name = m.group(1), m.group(2)
+        full = idx.repo.root / path
+        if not full.exists():
+            return m.group(0)
+        for i, line in enumerate(full.read_text(encoding="utf-8", errors="replace").split("\n"), 1):
+            if re.search(rf"\b(def|class|func|fn)\s+{re.escape(name)}\b", line):
+                return f"`{path}:{i}-{i}`"
+        return m.group(0)  # grep failed: leave file-level
+
+    return re.sub(r"\[([A-Za-z0-9_\-./]+\.\w+)::([A-Za-z0-9_]+)\]", upgrade, body)
 
 
 def _page_links(pages: list[str]) -> str:
@@ -42,7 +68,9 @@ def generate_baseline(idx: RepoIndex, out_dir: Path, llm: LLM,
 
     def gen(name: str, prompt: str) -> str:
         resp = llm.chat(BASELINE_SYSTEM, prompt, purpose=f"baseline:{name}")
-        body, cites = resolve_all(resp.text, idx, trajectory)
+        # baseline attempts line ranges via grep upgrade (fair comparison for depth)
+        resp_text = _grep_upgrade(resp.text, idx)
+        body, cites = resolve_all(resp_text, idx, trajectory)
         stats["citations"] += len(cites)
         stats["unresolved"] += sum(1 for c in cites if c.status != "ok")
         page = f"# {name.replace('-', ' ').title()}\n\n{body}\n{_page_links(pages)}"

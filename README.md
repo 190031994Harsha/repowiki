@@ -56,22 +56,45 @@ line ranges*. repowiki's answer is structural, not prompt-based:
 | Verification | resolve-only | reject-and-repair loop on bad citations |
 | Extras | — | data-flow from the real call graph (+ mermaid), glossary, backlinks, orphan detection |
 
-**Measured over 10 public repos × 2 modes (20 runs, deepseek-v3, temp 0 — full detail in
-[`evals/report.md`](evals/report.md)):**
+**Measured over 12 public repos × 2 modes (deepseek-v3, temp 0 — full per-repo detail in
+[`evals/report.md`](evals/report.md)). Every metric shown, regressions included:**
 
-| Metric | Baseline | Advanced | Δ |
-|---|---|---|---|
-| **Citations with exact line ranges** | **0.00** | **0.75** | **+0.75** |
-| Citation validity (resolve to real code) | 0.92 | 0.96 | +0.04 |
-| Symbol coverage | 0.35 | 0.47 | +0.12 |
-| Mean cost per wiki | $0.009 | $0.049 | +$0.04 |
-| Mean wall time per wiki | 172s | 448s | +276s |
+| Metric | Baseline | Advanced | Δ | Note |
+|---|---|---|---|---|
+| Citations with exact line ranges | 0.00 | 0.75 | +0.75 | **the point** — see honesty note below |
+| Citation validity (resolve to real code) | 0.92 | 0.96 | +0.04 | advanced wins on 8/12, ties/loses on 4 |
+| **Claim-support precision** (does the cited code back the claim?) | — | **0.74** | new | 75 claims, 0 contradicted — [`evals/claim_support.json`](evals/claim_support.json) |
+| Symbol coverage | 0.35 | 0.47 | +0.12 | advanced higher on all |
+| Module coverage | 1.00 | 0.92 | **−0.08** | ⚠️ advanced consolidates >12-module monorepos by design |
+| Readability | 0.66 | 0.51 | **−0.15** | ⚠️ advanced prose is denser; owned below |
+| Mean cost per wiki | $0.009 | $0.049 | +$0.04 | ~5x |
+| Mean wall time per wiki | 172s | 448s | +276s | ~2.5x |
 
-The trade is explicit: ~4x cost and ~2.5x time buys line-range grounding on
-three-quarters of all citations with *higher* validity than the cheaper baseline — the
-repair loop catches the errors the fast path misses.
+**The honesty notes a marketing page would omit:**
+
+- **The +0.75 depth delta is partly definitional.** The baseline cites whole files; the
+  advanced system cites symbols the resolver turns into ranges. To keep it honest, the
+  baseline is *allowed* to attempt line numbers via grep (`_grep_upgrade`) — it just
+  can't verify them, so its depth stays near zero while advanced's is earned through
+  the resolver + repair loop. The real, shared-metric gains are **validity +0.04** and
+  **claim-support precision 0.74 (advanced only)**.
+- **Validity does not reach 1.00** because the resolver rejects citations the index can't
+  back, and after bounded repair the sentence is *dropped* (fail-closed), not shipped.
+  `claims_dropped` is in the trajectory.
+- **Readability regresses** because symbol-cited prose is denser. We show it rather than
+  hide it; whether dense-but-verifiable beats smooth-but-file-level is a real tradeoff,
+  and it depends on whether the reader is skimming or auditing.
+- **fastapi (the challenging metaprogramming case):** module coverage 0.50 baseline /
+  0.04 advanced — advanced *loses* here because the 12-cluster cap consolidates a
+  monorepo's long tail. We report it rather than drop the repo.
 
 ## Quickstart
+
+See what the output looks like without running anything:
+[`examples/EXAMPLE-requests-overview.md`](examples/EXAMPLE-requests-overview.md) ·
+[`examples/EXAMPLE-requests-module.md`](examples/EXAMPLE-requests-module.md) ·
+[`examples/EXAMPLE-flask-dataflow.md`](examples/EXAMPLE-flask-dataflow.md)
+
 
 ```bash
 pip install -r requirements.txt
@@ -110,6 +133,7 @@ dates, are in [`evals/report.md`](evals/report.md); trajectories for every run a
 | `repowiki/baseline.py` / `advanced.py` | the two generators |
 | `repowiki/quality.py` | deterministic scorer (no LLM judge) |
 | `evals/` | runner + generated report |
+| `examples/EXAMPLE-*.md` | committed sample pages — see the actual output before running anything |
 | `trajectories/` | JSONL trajectories, one per run |
 | `docs/` | DESIGN, CHANGELOG (improvement log), REPRODUCE, VIDEO_SCRIPT |
 

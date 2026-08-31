@@ -10,3 +10,4 @@ evals/report.json
 evals/wikis/
 examples/*/
 !examples/.gitkeep
+!examples/EXAMPLE-*.md

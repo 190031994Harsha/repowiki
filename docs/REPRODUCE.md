@@ -1,7 +1,13 @@
 # Reproduction Guide
 
-From a clean machine to the full evaluation in **~20 minutes**. Cost: **< $0.50** on the
-default model (deepseek via OpenRouter); expect ~$2–5 if you switch to frontier slugs.
+Two tiers, honestly labeled:
+
+- **Smoke test** (2 repos, requests + click): **~10 minutes, ~$0.10**. Verifies the whole
+  pipeline works.
+- **Full evaluation** (12 repos × 2 modes): **~40 minutes wall with 4 parallel workers,
+  ~$0.60**. Run sequentially it's ~2.5 hours — don't do that.
+
+All on the default model (deepseek via OpenRouter); frontier slugs cost ~$2–5 more.
 
 ## 1. Prerequisites
 

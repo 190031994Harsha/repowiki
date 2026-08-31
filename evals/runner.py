@@ -37,6 +37,9 @@ DEFAULT_REPOS = [
     "https://github.com/pypa/packaging",          # small-mid Python, parsers
     "https://github.com/python-jsonschema/jsonschema",  # mid Python, registry patterns
     "https://github.com/tartley/colorama",        # small Python, thin wrapper
+    # non-Python: honest test of the regex-scanner languages (lower depth expected)
+    "https://github.com/sirupsen/logrus",         # Go: widely-used logging lib
+    "https://github.com/microsoft/TypeScript-TmLanguage",  # TS/grammar: non-trivial TS
 ]
 
 
