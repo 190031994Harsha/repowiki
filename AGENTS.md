@@ -33,8 +33,9 @@ every `llm_call` event) and in `evals/report.md`. Development/eval default:
   temp cache), and no tool exists that writes to the target tree.
 - Agents **never see secrets** — all content is scanned and redacted (`repowiki/secrets.py`)
   before prompt construction; findings are reported per run.
-- Agents **cannot fabricate citations that survive** — the deterministic resolver rejects
-  any symbol/path not in the index, and the scorer re-validates everything emitted.
+- Agents cannot fabricate citations that survive — the deterministic resolver rejects
+  any symbol/path not in the index, the page fails closed (unbacked sentences are
+  dropped), and the scorer re-validates everything emitted.
 
 ## Human checkpoints
 

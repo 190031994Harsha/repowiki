@@ -1,0 +1,59 @@
+{
+ "integrity": {
+  "status": "done",
+  "model": "openai/gpt-5.6-sol",
+  "started": 1788158654.562546,
+  "wall_s": 84.1,
+  "tokens": 12763
+ },
+ "agentic": {
+  "status": "done",
+  "model": "anthropic/claude-opus-4.7",
+  "started": 1788158976.1836448,
+  "error": "<HTTPError 404: 'Not Found'>",
+  "wall_s": 27.9,
+  "tokens": 9979
+ },
+ "rubric": {
+  "status": "done",
+  "model": "anthropic/claude-opus-5",
+  "started": 1788158654.5635467,
+  "wall_s": 142.4,
+  "tokens": 23766
+ },
+ "user": {
+  "status": "done",
+  "model": "google/gemini-3.1-pro-preview",
+  "started": 1788158654.5635467,
+  "wall_s": 24.3,
+  "tokens": 6383
+ },
+ "correctness": {
+  "status": "done",
+  "model": "deepseek/deepseek-v4-pro",
+  "started": 1788158654.564548,
+  "wall_s": 100.8,
+  "tokens": 11824
+ },
+ "claimaudit": {
+  "status": "done",
+  "model": "moonshotai/kimi-k3",
+  "started": 1788158654.564548,
+  "wall_s": 256.9,
+  "tokens": 12615
+ },
+ "winstrategy": {
+  "status": "done",
+  "model": "x-ai/grok-4.6",
+  "started": 1788158654.5655506,
+  "wall_s": 69.9,
+  "tokens": 11128
+ },
+ "skeptic2": {
+  "status": "done",
+  "model": "qwen/qwen3-max-thinking",
+  "started": 1788158654.5655506,
+  "wall_s": 42.9,
+  "tokens": 11811
+ }
+}

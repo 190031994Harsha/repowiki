@@ -47,10 +47,13 @@ class RepoIndex:
             return self.symbols[ref]
         if ref in self.by_name and len(self.by_name[ref]) == 1:
             return self.symbols[self.by_name[ref][0]]
-        # src-layout alias: try prefixing with each known top-level dir
-        for prefix in ("src.", "lib.", "app."):
-            if not ref.startswith(prefix) and (prefix + ref) in self.symbols:
-                return self.symbols[prefix + ref]
+        # src-layout alias: collect ALL prefix candidates, resolve only when exactly
+        # one exists — else `src.foo.Bar` would silently win over `lib.foo.Bar`
+        prefix_hits = [self.symbols[prefix + ref]
+                       for prefix in ("src.", "lib.", "app.")
+                       if not ref.startswith(prefix) and (prefix + ref) in self.symbols]
+        if len(prefix_hits) == 1:
+            return prefix_hits[0]
         # dotted simple name at any depth: "app.Flask" -> "src.flask.app.Flask"
         if "." in ref:
             matches = [q for q in self.symbols if q.endswith("." + ref) or q == ref]

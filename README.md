@@ -41,10 +41,14 @@ line ranges*. repowiki's answer is structural, not prompt-based:
 2. The LLM **never writes line numbers**. It cites `[[sym:orders.create_order]]` or
    `[src/orders/main.py]`.
 3. A deterministic **resolver** maps each citation to `file:start-end`. Unresolvable
-   citations are rejected and the page is sent back for repair (bounded), so the emitted
-   wiki cannot contain a citation the tree doesn't support.
+   citations are rejected and the page is sent back for repair; after bounded repair,
+   any sentence still carrying an unresolvable citation is **dropped** (fail-closed) —
+   so an emitted page never ships a dangling reference, at the cost of occasionally
+   losing a sentence the index couldn't back.
 4. A post-hoc **validator** re-checks every emitted citation (file exists, range in
-   bounds) for the eval score — validity is a measurement, not a hope.
+   bounds) for the eval score — validity is a measurement, not a hope. A separate
+   **claim-support** pass then checks whether each cited span actually *supports* its
+   sentence (the difference between "this span exists" and "this claim is true").
 
 ## Baseline vs Advanced
 
@@ -57,18 +61,19 @@ line ranges*. repowiki's answer is structural, not prompt-based:
 | Extras | — | data-flow from the real call graph (+ mermaid), glossary, backlinks, orphan detection |
 
 **Measured over 12 public repos × 2 modes (deepseek-v3, temp 0 — full per-repo detail in
-[`evals/report.md`](evals/report.md)). Every metric shown, regressions included:**
+[`evals/report.md`](evals/report.md)). Aggregates computed from `report.json` by script;
+every metric shown, regressions included:**
 
 | Metric | Baseline | Advanced | Δ | Note |
 |---|---|---|---|---|
-| Citations with exact line ranges | 0.00 | 0.75 | +0.75 | **the point** — see honesty note below |
-| Citation validity (resolve to real code) | 0.92 | 0.96 | +0.04 | advanced wins on 8/12, ties/loses on 4 |
+| Citations with exact line ranges | 0.03 | 0.67 | +0.64 | the point — see honesty note below |
+| Citation validity (resolve to real code) | 0.91 | 0.96 | +0.05 | 7/12 wins, 1 tie, 4 losses |
 | **Claim-support precision** (does the cited code back the claim?) | — | **0.74** | new | 75 claims, 0 contradicted — [`evals/claim_support.json`](evals/claim_support.json) |
-| Symbol coverage | 0.35 | 0.47 | +0.12 | advanced higher on all |
-| Module coverage | 1.00 | 0.92 | **−0.08** | ⚠️ advanced consolidates >12-module monorepos by design |
-| Readability | 0.66 | 0.51 | **−0.15** | ⚠️ advanced prose is denser; owned below |
-| Mean cost per wiki | $0.009 | $0.049 | +$0.04 | ~5x |
-| Mean wall time per wiki | 172s | 448s | +276s | ~2.5x |
+| Symbol coverage | 0.41 | 0.52 | +0.11 | 10/12 wins, 1 tie, 1 loss (fastapi) |
+| Module coverage | 0.96 | 0.87 | **−0.09** | ⚠️ advanced consolidates >12-module monorepos by design |
+| Readability | 0.73 | 0.56 | **−0.17** | ⚠️ advanced prose is denser; owned below |
+| Mean cost per wiki | $0.010 | $0.044 | +$0.034 | ~4.5x |
+| Mean wall time per wiki | 182s | 583s | +401s | ~3.2x |
 
 **The honesty notes a marketing page would omit:**
 
@@ -144,8 +149,9 @@ dates, are in [`evals/report.md`](evals/report.md); trajectories for every run a
   are import-based, not call-based.
 - **Very large repos** are truncated at ingest (4 MB content cap; oversized files are
   skeletonized in prompts). Monorepo-scale input will need per-package runs.
-- **The LLM can still write true-but-unguided prose** — citations guarantee that claims
-  are *anchored*, not that every nuance is correct. The verifier checks anchors, not truth.
+- **Citations guarantee the anchor exists; a separate verifier checks the claim matches.**
+  The resolver proves every cited span is real; the claim-support judge measures whether
+  the prose actually reflects it (0.74 precision, 0 contradicted over 75 sampled claims).
 - Generated prose reflects the model used; scores in `evals/report.md` record the slug.
 - Main failure mode we still see: on repos with heavy metaprogramming (decorator-registered
   routes, dynamic imports), the static call graph under-reports edges and the data-flow page

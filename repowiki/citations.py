@@ -8,8 +8,9 @@ Two syntaxes:
 
 The LLM never emits line numbers. It emits a path or symbol reference; the resolver
 deterministically attaches the line range. Unresolvable citations are rejected and the
-generator is asked to repair them (bounded retries), so the emitted wiki cannot contain
-a hallucinated path or range.
+generator is asked to repair them (bounded retries); after the last retry the sentence
+is dropped (fail-closed), so the emitted wiki is built not to contain a hallucinated
+path or range.
 
 Every resolution attempt is trajectory-logged — this is the audit trail for the
 30-point grounding criterion.
@@ -37,8 +38,16 @@ class Citation:
     line_end: int = 0
 
     def render(self) -> str:
+        """Render with the human-readable symbol name preserved.
+
+        'User creates a `Request` (`src/requests/models.py:284-375`)', not
+        'User creates `src/requests/models.py:284-375`' — the reader needs the noun.
+        """
+        # the symbol's simple name, for prose readability
+        name = self.ref.split("::")[-1].split(".")[-1] if self.kind != "file" else ""
         if self.status == "ok" and self.kind in ("symbol", "path_symbol"):
-            return f"`{self.file}:{self.line_start}-{self.line_end}`"
+            loc = f"{self.file}:{self.line_start}-{self.line_end}"
+            return f"`{name}` (`{loc}`)" if name else f"`{loc}`"
         if self.status == "ok":
             return f"`{self.file}`"
         return f"`{self.raw}` *(unresolved citation)*"
@@ -69,18 +78,16 @@ def resolve(c: Citation, idx: RepoIndex, trajectory=None) -> Citation:
             c.status = "unresolved"
     elif c.kind == "path_symbol":
         path, name = c.ref.split("::", 1)
-        sym = None
-        for qual in idx.by_name.get(name, []):
-            if idx.symbols[qual].file == path:
-                sym = idx.symbols[qual]
-                break
-        if sym:
+        # collect ALL candidates in that file; resolve only when exactly one matches,
+        # else the first same-name symbol would silently win (integrity PoC #1)
+        cands = [idx.symbols[qual] for qual in idx.by_name.get(name, [])
+                 if idx.symbols[qual].file == path]
+        if len(cands) == 1:
+            sym = cands[0]
             c.status, c.file = "ok", sym.file
             c.line_start, c.line_end = sym.line_start, sym.line_end
         else:
-            # TEETH: a missing symbol on an existing file is UNRESOLVED, not a silent
-            # degrade to whole-file. A wrong 1-EOF range dressed as a symbol cite is the
-            # exact failure we exist to prevent. Fail -> repair loop.
+            # 0 = missing symbol; >1 = ambiguous. Both fail closed to repair.
             c.status = "unresolved"
     else:  # symbol
         sym = idx.resolve(c.ref)

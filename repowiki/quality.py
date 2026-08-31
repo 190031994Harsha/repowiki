@@ -30,7 +30,9 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
     if not pages:
         return {"error": "no pages"}
 
-    # ---- citations (handle raw [path] / [[sym:x]] AND rendered `path` / `path:a-b`)
+    # ---- citations (handle raw [path] / [[sym:x]] AND rendered forms)
+    # provenance: rendered symbol cites have the form `Name` (`path:a-b`); a bare
+    # `path:a-b` in backticks is also accepted (older runs).
     total_c, ok_c, sym_c = 0, 0, 0
     cited_ranges: list[tuple[str, int, int]] = []
     problems = []
@@ -53,15 +55,20 @@ def score_wiki(wiki_dir: Path, idx: RepoIndex) -> dict:
             if idx.file_lines(m.group(1)) > 0:
                 total_c += 1
                 ok_c += 1
-        # rendered symbol-level: `path:a-b`
-        for m in re.finditer(r"`([A-Za-z0-9_\-./]+\.\w+):(\d+)-(\d+)`", text):
+        # rendered symbol-level: `Name` (`path:a-b`)  or legacy `path:a-b`
+        for m in re.finditer(r"\(`?([A-Za-z0-9_\-./]+\.\w+):(\d+)-(\d+)`?\)"
+                             r"|`([A-Za-z0-9_\-./]+\.\w+):(\d+)-(\d+)`", text):
+            # normalize to (path, a, b) regardless of which alternative matched
+            path = m.group(1) or m.group(4)
+            if not path:
+                continue
+            a, b = int(m.group(2) or m.group(5)), int(m.group(3) or m.group(6))
             sym_c += 1
             total_c += 1
-            n = idx.file_lines(m.group(1))
-            a, b = int(m.group(2)), int(m.group(3))
+            n = idx.file_lines(path)
             if n and 1 <= a <= b <= n + 5:
                 ok_c += 1
-                cited_ranges.append((m.group(1), a, b))
+                cited_ranges.append((path, a, b))
             else:
                 problems.append(f"{name}: bad range {m.group(0)}")
 

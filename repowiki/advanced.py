@@ -176,6 +176,43 @@ def _gen_with_repair(idx: RepoIndex, llm: LLM, traj: Trajectory,
     return body, cites
 
 
+def _verify_claims(body: str, idx: RepoIndex, llm: LLM, traj: Trajectory,
+                   stats: dict) -> tuple[str, int]:
+    """The verifier agent: check each claim against its cited span.
+
+    This is the second role that makes the system genuinely multi-agent — a skeptic
+    with veto power, distinct from the author. Sentences whose citations don't support
+    them are dropped (fail-closed). Only runs when VERIFY_CLAIMS=1 (default on).
+    """
+    import os
+    if os.environ.get("VERIFY_CLAIMS", "1") != "1":
+        return body, 0
+    from .claim_extract import claims_from_body
+    claims = claims_from_body(body)
+    if not claims:
+        return body, 0
+    import re
+    dropped = 0
+    for c in claims:
+        excerpt = idx.content_at(c["file"], c["a"], c["b"])
+        if len(excerpt) > 1200:
+            excerpt = excerpt[:1200]
+        verdict = llm.chat(
+            "You are a meticulous fact-checker. Does the code excerpt support the claim? "
+            "Answer exactly one word: SUPPORTED or UNSUPPORTED.",
+            f"CLAIM: {c['claim']}\n\nEXCERPT:\n{excerpt}",
+            max_tokens=10, purpose="verify-claim")
+        supported = "SUPPORTED" in verdict.text.upper()
+        traj.event("verify_claim", {"claim": c["claim"][:80], "file": c["file"],
+                                    "supported": supported})
+        if not supported:
+            # drop the sentence carrying this claim
+            body = body.replace(c["full"], "", 1)
+            dropped += 1
+            stats["claims_verified_dropped"] = stats.get("claims_verified_dropped", 0) + 1
+    return body, dropped
+
+
 def generate_advanced(idx: RepoIndex, out_dir: Path, llm: LLM,
                       traj: Trajectory) -> dict:
     t0 = time.time()
@@ -289,6 +326,8 @@ defining symbol as [[sym:...]. Only define terms grounded in the code."""
 Write {name}.md. Focus: {spec.get('focus','')}. Cite with [[sym:...]] and [path]."""
 
         body, cites = _gen_with_repair(idx, llm, traj, name, prompt, stats)
+        # verifier agent: drop claims whose citations don't support them
+        body, _ = _verify_claims(body, idx, llm, traj, stats)
         written[name] = body
         stats["citations"] += len(cites)
         stats["unresolved"] += sum(1 for c in cites if c.status != "ok")
