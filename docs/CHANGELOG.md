@@ -142,6 +142,30 @@ it before a human judge could. Every submission should have a red-team panel ste
 
 ---
 
+## [9] Judge panel v2 (deep multi-lens) → readability, verifier agent, showcase — 2026-08-31
+
+**Change:** ran a second, deeper panel — 7 models with *distinct lenses and fresh evidence*
+(a full generated wiki, the README's own claims, runnable resolver source as a PoC target).
+This round found what v1 missed:
+
+| v2 finding (judge) | Fix shipped |
+|---|---|
+| Prose replaces symbol names with raw coordinates — "User creates `src/requests/models.py:284-375`" is unreadable (user) | citations now render as `` `Request` (`src/requests/models.py:284-375`)`` — noun preserved, span in parentheses |
+| README aggregates stale: computed on 10 repos, labeled 12; depth 0.75 claimed vs 0.67 actual (rubric) | recomputed all aggregates from `report.json` by script; table now matches exactly |
+| Same-file same-name symbols resolve to first match — wrong-but-valid (integrity PoC) | `path::name` resolves only when exactly one candidate; else fail-closed to repair |
+| src/lib alias picks arbitrary prefix (integrity PoC) | prefix aliases resolve only when unique |
+| Batch pipeline, not multi-agent; no claim-level verification (agentic) | **added the verifier agent** — per-claim support check with veto, distinct skeptic role |
+| No product surface — judges screenshot UI, not JSON (winstrategy) | **built `repowiki showcase`** — self-contained HTML receipt: expandable citations showing exact source lines + grounding ledger + dropped-claims appendix |
+
+**Evidence that drove it:** `docs/judges/v2/*.md` — 8 reports, incl. two concrete PoCs
+(working exploit inputs) from the integrity judge.
+
+**The differentiator (winstrategy):** "a wiki that would rather delete a sentence than
+underline a lie." The showcase makes refusal inspectable — a judge clicks a citation and
+sees the exact code, and can read the sentences the system *refused to ship*.
+
+---
+
 ## Main failure mode
 
 On metaprogramming-heavy repos (decorator-registered routes, dynamic imports), the static

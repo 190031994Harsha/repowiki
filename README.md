@@ -95,8 +95,11 @@ every metric shown, regressions included:**
 
 ## Quickstart
 
-See what the output looks like without running anything:
-[`examples/EXAMPLE-requests-overview.md`](examples/EXAMPLE-requests-overview.md) ·
+**See the output before running anything** — a self-contained HTML receipt where every
+citation expands to the exact source lines, with a grounding ledger:
+**[`showcase/requests.html`](showcase/requests.html)** (open in a browser; no server needed).
+
+Or the raw markdown: [`examples/EXAMPLE-requests-overview.md`](examples/EXAMPLE-requests-overview.md) ·
 [`examples/EXAMPLE-requests-module.md`](examples/EXAMPLE-requests-module.md) ·
 [`examples/EXAMPLE-flask-dataflow.md`](examples/EXAMPLE-flask-dataflow.md)
 
