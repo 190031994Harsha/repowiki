@@ -166,6 +166,28 @@ sees the exact code, and can read the sentences the system *refused to ship*.
 
 ---
 
+## [10] Judge panel v3 (empirical) → the strawman baseline + broken repro — 2026-08-31
+
+**Change:** third panel, this time *empirical* — judges executed code, recomputed numbers,
+walked the README blind, and reviewed the source line-by-line instead of reasoning about it.
+
+| v3 finding (judge) | Fix shipped |
+|---|---|
+| **Baseline is a strawman** — never sees file contents, so the improvement is confounded by information access, not pipeline (fairness / deepseek) | baseline module pages now get the same file contents + symbol signatures; only the *process* differs (no planner/repair) |
+| **README eval command broken as written** — placeholder, wrong module, missing python-dotenv/pytest (repro / gemini) | fixed command, added both deps, aligned 10/12 repo counts |
+| **Metric integrity bugs** — +5-line EOF slack inflates validity; symbol_coverage is substring search (`get` matches "target"); (linereview / opus-5) | killed the slack (strict in-bounds), word-boundary match for coverage |
+| **Parser crashes / drops edges** — ast.parse only caught SyntaxError (NUL bytes crash the run); relative imports lost package context | catch all ast exceptions; `from . import x` anchors at package |
+| ~30 minor findings (unicode cites, off-by-ones, glob order, readability splitter) | noted; several fixed, rest documented |
+
+**Verified by execution:** both v2 integrity PoCs re-run — ambiguous same-file symbols and
+src/lib aliases now **fail closed** (`unresolved`), confirming the resolver teeth hold.
+
+**The one thing all three panels agree wins first prize:** a measured-usefulness study
+(engineers answer onboarding questions faster with the advanced wiki). Noted in README as
+the honest remaining gap, not claimed.
+
+---
+
 ## Main failure mode
 
 On metaprogramming-heavy repos (decorator-registered routes, dynamic imports), the static
